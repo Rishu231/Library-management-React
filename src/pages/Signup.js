@@ -1,24 +1,30 @@
 import { useState, useEffect } from "react";
 import API, { getCsrfToken } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import axios from "../services/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Ensure CSRF token is available
   useEffect(() => {
-    API.get("/api/csrf/") // ✅ Django should return CSRF token
-      .then(() => console.log("CSRF Token fetched"))
-      .catch((err) => console.error("CSRF Fetch Error:", err));
-  }, []);
+    axios.get("/api/csrf/")
+      .then(res => console.log("CSRF Token:", res.data))
+      .catch(err => console.error(err));
+  }, []); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+  
     try {
+      const csrfToken = getCsrfToken();  // ✅ Get CSRF token
+      if (!csrfToken) {
+        console.error("No CSRF token found!");
+        return;
+      }
+  
       await API.post(
         "/admin/signup/",
         {
@@ -27,11 +33,11 @@ const Signup = () => {
         },
         {
           headers: {
-            "X-CSRFToken": getCsrfToken(), // ✅ Fetch token from cookies
+            "X-CSRFToken": csrfToken,  // ✅ Ensure token is sent
           },
         }
       );
-
+  
       alert("Signup successful! Redirecting to login...");
       navigate("/login");
     } catch (error) {
@@ -39,6 +45,7 @@ const Signup = () => {
       setError(error.response?.data?.error || "Signup failed! Try again.");
     }
   };
+  
 
   return (
     <div className="container mt-5 col-md-4">
