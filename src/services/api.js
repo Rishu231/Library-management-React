@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000", // Django backend URL
+  baseURL: "https://library-management-system-django.vercel.app/", // Django backend URL
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -27,7 +27,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem("refresh_token");
         if (refreshToken) {
-          const res = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
+          const res = await axios.post("https://library-management-system-django.vercel.app/api/token/refresh/", {
             refresh: refreshToken,
           });
           localStorage.setItem("access_token", res.data.access);
